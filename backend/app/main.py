@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 from app.config import get_settings
 from app.database import Base, SessionLocal, engine
 from app.datos_ejemplo import cargar_datos_ejemplo
-from app.routers import admin, auth, dispositivos, publico
+from app.routers import admin, auth, dispositivos, publico, superadmin
 from app.servicios.errores import ErrorNegocio
 
 
@@ -34,9 +34,12 @@ async def ciclo_de_vida(_app: FastAPI):
 def crear_app() -> FastAPI:
     ajustes = get_settings()
     app = FastAPI(
-        title="Parqueos Cuenca",
-        description="Ocupación de parqueos calculada a partir de entradas y salidas de vehículos.",
-        version="0.1.0",
+        title="Parqueos Cuenca — BalzAI",
+        description=(
+            "Ocupación de parqueos en tiempo real, operación para dueños/guardias de "
+            "parqueaderos y consola de Superadministración con analíticas de flujo y tráfico."
+        ),
+        version="0.2.0",
         lifespan=ciclo_de_vida,
     )
 
@@ -58,6 +61,7 @@ def crear_app() -> FastAPI:
     app.include_router(publico.router)
     app.include_router(auth.router)
     app.include_router(admin.router)
+    app.include_router(superadmin.router)
     app.include_router(dispositivos.router)
     return app
 

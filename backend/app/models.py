@@ -2,6 +2,12 @@
 
 La ocupación de un parqueo NO se guarda en ninguna columna: se calcula siempre a
 partir de la tabla `movimientos` (entradas − salidas). Ver app/servicios/ocupacion.py.
+
+Jerarquía de cuentas en `administradores`:
+- `admin` (Operador / Dueño de parqueadero / Seguridad): registra entradas/salidas y
+  gestiona los datos de su(s) parqueadero(s).
+- `superadmin` (Administrador de la aplicación): controla toda la plataforma, gestiona
+  ciudades, parqueaderos, operadores y dispositivos, y consulta analíticas de flujo y tráfico.
 """
 
 import enum
@@ -36,18 +42,23 @@ class TipoMovimiento(str, enum.Enum):
 
 
 class OrigenMovimiento(str, enum.Enum):
-    MANUAL = "manual"  # registrado por un administrador desde el panel
+    MANUAL = "manual"  # registrado por un operador/administrador desde el panel
     DISPOSITIVO = "dispositivo"  # enviado por un sensor o barrera de acceso
 
 
-def _enum_texto(tipo: type[enum.Enum], nombre: str) -> Enum:
+class RolAdministrador(str, enum.Enum):
+    ADMIN = "admin"  # dueño de parqueadero o personal de seguridad encargado
+    SUPERADMIN = "superadmin"  # administrador general de la aplicación
+
+
+def _enum_texto(tipo: type[enum.Enum], nombre: str, longitud: int = 16) -> Enum:
     """Enum guardado como texto + CHECK, portable entre SQLite y PostgreSQL."""
     return Enum(
         tipo,
         name=nombre,
         native_enum=False,
         create_constraint=True,
-        length=12,
+        length=longitud,
         values_callable=lambda miembros: [m.value for m in miembros],
     )
 
@@ -103,6 +114,7 @@ class Movimiento(Base):
     __table_args__ = (
         # Permite calcular la ocupación de un parqueo leyendo solo el índice.
         Index("ix_movimientos_parqueo_tipo", "parqueo_id", "tipo"),
+        Index("ix_movimientos_creado_en", "creado_en"),
     )
 
     id: Mapped[int] = mapped_column(IdGrande, primary_key=True)
@@ -116,13 +128,27 @@ class Movimiento(Base):
 
 
 class Administrador(Base):
-    """Único rol con cuenta. Los usuarios de lectura son anónimos."""
+    """Cuenta con acceso autenticado:
+    - `rol = 'admin'`: dueño de parqueadero o personal de seguridad encargado.
+      Si `parqueo_id` está definido, su alcance se limita exclusivamente a ese parqueadero.
+    - `rol = 'superadmin'`: administrador general de la aplicación con acceso a analíticas,
+      flujo vehicular y control global de la plataforma.
+    """
 
     __tablename__ = "administradores"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     usuario: Mapped[str] = mapped_column(String(60), unique=True)
+    nombre: Mapped[str | None] = mapped_column(String(120), default=None)
     clave_hash: Mapped[str] = mapped_column(String(255))
+    rol: Mapped[RolAdministrador] = mapped_column(
+        _enum_texto(RolAdministrador, "rol_administrador"),
+        default=RolAdministrador.ADMIN,
+    )
+    # Opcional: restringe a un operador ('admin') a un parqueadero específico.
+    parqueo_id: Mapped[int | None] = mapped_column(
+        ForeignKey("parqueos.id"), index=True, default=None
+    )
     activo: Mapped[bool] = mapped_column(Boolean, default=True)
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

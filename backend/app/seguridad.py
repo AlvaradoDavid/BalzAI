@@ -1,4 +1,4 @@
-"""Hash de contraseñas, tokens JWT de administrador y claves de dispositivo.
+"""Hash de contraseñas, tokens JWT de administrador/superadministrador y claves de dispositivo.
 
 Solo se usa la biblioteca estándar (PBKDF2) y PyJWT para mantener mínimas las dependencias.
 """
@@ -15,6 +15,8 @@ import jwt
 from app.config import get_settings
 
 ROL_ADMIN = "admin"
+ROL_SUPERADMIN = "superadmin"
+ROLES_PANEL = (ROL_ADMIN, ROL_SUPERADMIN)
 ALGORITMO_JWT = "HS256"
 ITERACIONES_PBKDF2 = 600_000  # recomendación OWASP para PBKDF2-HMAC-SHA256
 

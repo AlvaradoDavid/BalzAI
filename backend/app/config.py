@@ -24,9 +24,11 @@ class Settings(BaseSettings):
     # Orígenes del frontend autorizados por CORS (en desarrollo Vite usa un proxy y no lo necesita).
     cors_origenes: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
-    # Datos de ejemplo: ciudades, parqueos, un administrador y un dispositivo de prueba.
+    # Datos de ejemplo: ciudades, parqueos, superadministrador, operadores y sensor de prueba.
     # Solo se cargan si la base de datos está vacía.
     cargar_datos_ejemplo: bool = True
+    superadmin_usuario: str = "superadmin"
+    superadmin_clave: str = "balzai2026"
     admin_usuario: str = "admin"
     admin_clave: str = "parqueos2026"
     dispositivo_demo_clave: str = "sensor-demo-cuenca"

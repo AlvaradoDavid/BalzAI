@@ -13,10 +13,11 @@ from sqlalchemy.orm import sessionmaker  # noqa: E402
 
 from app.database import Base, crear_engine, get_db  # noqa: E402
 from app.main import app  # noqa: E402
-from app.models import Administrador, Ciudad, Dispositivo, Parqueo  # noqa: E402
-from app.seguridad import crear_token, hash_clave_dispositivo, hashear_clave  # noqa: E402
+from app.models import Administrador, Ciudad, Dispositivo, Parqueo, RolAdministrador  # noqa: E402
+from app.seguridad import ROL_SUPERADMIN, crear_token, hash_clave_dispositivo, hashear_clave  # noqa: E402
 
 CLAVE_ADMIN = "clave-de-prueba"
+CLAVE_SUPERADMIN = "clave-superadmin-prueba"
 CLAVE_DISPOSITIVO = "clave-sensor-prueba"
 
 
@@ -37,22 +38,40 @@ def db(fabrica_sesiones):
 
 @pytest.fixture
 def datos(db):
-    """Una ciudad, dos parqueos (capacidad 3 y 10), un administrador y un dispositivo."""
+    """Una ciudad, dos parqueos (capacidad 3 y 10), un superadmin, un operador y un dispositivo."""
     ciudad = Ciudad(slug="cuenca", nombre="Cuenca", provincia="Azuay", latitud=-2.9, longitud=-79.0)
     db.add(ciudad)
     db.flush()
     pequeno = Parqueo(ciudad_id=ciudad.id, nombre="Pequeño", latitud=-2.89, longitud=-79.0, capacidad=3)
     grande = Parqueo(ciudad_id=ciudad.id, nombre="Grande", latitud=-2.91, longitud=-79.01, capacidad=10)
     # Pocas iteraciones de PBKDF2 para que las pruebas sean rápidas.
-    admin = Administrador(usuario="admin", clave_hash=hashear_clave(CLAVE_ADMIN, iteraciones=1_000))
-    db.add_all([pequeno, grande, admin])
+    admin = Administrador(
+        usuario="admin",
+        nombre="Operador General",
+        clave_hash=hashear_clave(CLAVE_ADMIN, iteraciones=1_000),
+        rol=RolAdministrador.ADMIN,
+    )
+    superadmin = Administrador(
+        usuario="superadmin",
+        nombre="Superadmin App",
+        clave_hash=hashear_clave(CLAVE_SUPERADMIN, iteraciones=1_000),
+        rol=RolAdministrador.SUPERADMIN,
+    )
+    db.add_all([pequeno, grande, admin, superadmin])
     db.flush()
     sensor = Dispositivo(
         nombre="Sensor", parqueo_id=pequeno.id, clave_hash=hash_clave_dispositivo(CLAVE_DISPOSITIVO)
     )
     db.add(sensor)
     db.commit()
-    return {"ciudad": ciudad, "pequeno": pequeno, "grande": grande, "admin": admin, "sensor": sensor}
+    return {
+        "ciudad": ciudad,
+        "pequeno": pequeno,
+        "grande": grande,
+        "admin": admin,
+        "superadmin": superadmin,
+        "sensor": sensor,
+    }
 
 
 @pytest.fixture
@@ -70,6 +89,12 @@ def cliente(fabrica_sesiones):
 @pytest.fixture
 def cabeceras_admin(datos):
     token, _ = crear_token(datos["admin"].id)
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def cabeceras_superadmin(datos):
+    token, _ = crear_token(datos["superadmin"].id, rol=ROL_SUPERADMIN)
     return {"Authorization": f"Bearer {token}"}
 
 
