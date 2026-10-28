@@ -1,0 +1,4 @@
+-r requirements.txt
+pytest==9.1.1
+# Cliente HTTP que usa fastapi.testclient (Starlette recomienda httpx2 en lugar de httpx).
+httpx2==2.16.0

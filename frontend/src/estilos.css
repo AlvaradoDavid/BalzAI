@@ -1,0 +1,667 @@
+/* ----------------------------------------------------------------
+ * Sistema visual inspirado en Apple Design (WWDC Fluid Interfaces & UI Typography):
+ *  - Tipografía del sistema con optical sizing, tracking y leading según tamaño.
+ *  - Materiales translúcidos (backdrop-filter) flotando sobre el mapa.
+ *  - Respuesta instantánea en pointer-down (:active scale 0.97).
+ *  - Soporte para prefers-reduced-motion, prefers-reduced-transparency y prefers-contrast.
+ * ---------------------------------------------------------------- */
+
+:root {
+  --azul: #0066cc;
+  --azul-oscuro: #0f172a;
+  --verde: #15803d;
+  --ambar: #b45309;
+  --rojo: #b91c1c;
+  --gris: #4b5563;
+  --borde: rgba(15, 23, 42, 0.1);
+  --fondo: #f2f2f7;
+  --texto: #111827;
+  --radio: 16px;
+  --radio-control: 10px;
+  --sombra-flotante:
+    0 18px 42px -10px rgba(15, 23, 42, 0.22),
+    0 4px 12px rgba(15, 23, 42, 0.08);
+  --sombra-tarjeta:
+    0 2px 8px rgba(15, 23, 42, 0.05),
+    0 1px 2px rgba(15, 23, 42, 0.04);
+
+  font:
+    100%/1.5 system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  font-optical-sizing: auto;
+  color: var(--texto);
+  background: var(--fondo);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+/* Tipografía: tracking negativo en titulares grandes, leading más cerrado. */
+h1 {
+  margin: 0 0 0.45rem;
+  font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+  font-weight: 700;
+}
+
+h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  letter-spacing: -0.018em;
+  font-weight: 700;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.contenido {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ---------------------------------------------------------------- materiales translúcidos */
+.cristal {
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: var(--sombra-flotante);
+}
+
+/* ---------------------------------------------------------------- cabecera */
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  background: rgba(15, 23, 42, 0.88);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  z-index: 1100;
+}
+
+.cabecera a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.015em;
+}
+
+.marca-logo {
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 8px;
+  background: var(--azul);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 102, 204, 0.45);
+}
+
+.cabecera nav {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.cabecera nav a {
+  padding: 0.42rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  opacity: 0.85;
+  transition:
+    transform 100ms ease-out,
+    background-color 150ms ease,
+    opacity 150ms ease;
+}
+
+.cabecera nav a:active {
+  transform: scale(0.96);
+}
+
+.cabecera nav a.active {
+  background: rgba(255, 255, 255, 0.18);
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------- colores por nivel */
+.nivel-libre { background: var(--verde); }
+.nivel-medio { background: var(--ambar); }
+.nivel-lleno { background: var(--rojo); }
+.nivel-inactivo { background: var(--gris); }
+.texto-libre { color: var(--verde); }
+.texto-medio { color: var(--ambar); }
+.texto-lleno { color: var(--rojo); }
+
+/* ---------------------------------------------------------------- mapa y capas flotantes */
+.pagina-mapa {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mapa-lienzo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.mapa {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.mapa-cargando {
+  display: grid;
+  place-items: center;
+  color: var(--gris);
+}
+
+/* Píldora translúcida flotante con el resumen de la ciudad sobre el mapa. */
+.barra-mapa {
+  position: absolute;
+  top: 0.85rem;
+  left: 3.4rem;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.resumen {
+  color: #374151;
+}
+
+.resumen b {
+  color: var(--texto);
+  font-weight: 700;
+}
+
+/* Marcador tipo pin con cifra tabular e interacción inmediata en pointer-down. */
+.marcador {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2.5px solid white;
+  box-shadow:
+    0 6px 14px rgba(15, 23, 42, 0.32),
+    0 1px 3px rgba(15, 23, 42, 0.2);
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 160ms ease;
+  will-change: transform;
+}
+
+.marcador:active {
+  transform: rotate(-45deg) scale(0.92);
+  transition: transform 80ms ease-out;
+}
+
+.marcador span {
+  transform: rotate(45deg);
+  color: white;
+  font-weight: 700;
+  font-size: 0.86rem;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.marcador.seleccionado {
+  transform: rotate(-45deg) scale(1.24);
+  border-color: var(--azul-oscuro);
+  box-shadow:
+    0 10px 22px rgba(15, 23, 42, 0.42),
+    0 0 0 3px rgba(255, 255, 255, 0.85);
+}
+
+/* ---------------------------------------------------------------- panel flotante (sheet) */
+.panel {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 950;
+  width: min(360px, calc(100% - 1.7rem));
+  max-height: calc(100% - 1.7rem);
+  padding: 1.35rem 1.4rem;
+  border-radius: var(--radio);
+  overflow-y: auto;
+  will-change: transform, opacity;
+}
+
+.panel-detalle {
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+
+.panel-detalle:active {
+  cursor: grabbing;
+}
+
+.tirador {
+  display: none;
+  width: 38px;
+  height: 5px;
+  margin: -0.35rem auto 0.75rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.22);
+}
+
+.panel-guia p {
+  margin: 0.35rem 0;
+  color: var(--gris);
+  font-size: 0.93rem;
+}
+
+.cerrar {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.08);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #374151;
+  transition:
+    transform 100ms ease-out,
+    background-color 150ms ease;
+}
+
+.cerrar:hover {
+  background: rgba(15, 23, 42, 0.14);
+}
+
+.cerrar:active {
+  transform: scale(0.92);
+}
+
+/* Etiquetas pequeñas: tracking ligeramente positivo para mayor legibilidad. */
+.etiqueta {
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  color: white;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.direccion {
+  margin: 0 0 1rem;
+  color: var(--gris);
+  font-size: 0.92rem;
+}
+
+.cifras {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.cifra {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.95rem 0.5rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+}
+
+/* Cifras display: leading cerrado (1.05), tracking negativo (-0.03em) y números tabulares. */
+.cifra strong {
+  font-size: 2.5rem;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.cifra span {
+  margin-top: 0.2rem;
+  color: var(--gris);
+  font-size: 0.84rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.barra {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+}
+
+.barra-relleno {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.pie-capacidad {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  color: var(--gris);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.leyenda-colores {
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.leyenda-colores li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.32rem;
+}
+
+.punto {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* ---------------------------------------------------------------- mensajes */
+.error,
+.exito,
+.aviso {
+  margin: 0.5rem 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radio-control);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.error { background: #fee2e2; color: #991b1b; }
+.exito { background: #dcfce7; color: #166534; }
+.aviso { background: #fef3c7; color: #92400e; }
+
+.barra-mapa .error {
+  margin: 0;
+  padding: 0.2rem 0.6rem;
+}
+
+.secundario {
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------------- formularios y botones */
+.tarjeta {
+  background: white;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.1rem 1.3rem;
+  box-shadow: var(--sombra-tarjeta);
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+input,
+select {
+  padding: 0.52rem 0.68rem;
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  border-radius: var(--radio-control);
+  background: white;
+  font: inherit;
+  font-weight: 400;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+input:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.22);
+}
+
+/* Respuesta inmediata en pointer-down (:active), nunca esperando solo a click. */
+.boton {
+  padding: 0.52rem 0.95rem;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  border-radius: var(--radio-control);
+  background: white;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    transform 100ms ease-out,
+    background-color 140ms ease,
+    opacity 140ms ease;
+}
+
+.boton:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.boton:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.boton.primario { background: var(--azul); border-color: var(--azul); color: white; }
+.boton.entrada { background: var(--verde); border-color: var(--verde); color: white; }
+.boton.salida { background: var(--rojo); border-color: var(--rojo); color: white; }
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pagina-centrada {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: 1rem;
+}
+
+.login {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  width: min(370px, 100%);
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--borde);
+  transform-origin: top center;
+}
+
+.formulario .ancho {
+  grid-column: 1 / -1;
+}
+
+.casilla {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ---------------------------------------------------------------- administración */
+.pagina-admin {
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+.encabezado-admin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.lista-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fila-datos {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fila-nombre,
+.fila-ocupacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+}
+
+.fila-parqueo.inactivo {
+  opacity: 0.62;
+}
+
+/* ---------------------------------------------------------------- móvil (bottom sheet) */
+@media (max-width: 760px) {
+  .barra-mapa {
+    top: 0.65rem;
+    left: 3.2rem;
+    right: 0.65rem;
+    border-radius: 14px;
+  }
+
+  .panel {
+    top: auto;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+    max-height: 58%;
+    border-radius: 20px;
+  }
+
+  .panel-detalle {
+    touch-action: none;
+  }
+
+  .tirador {
+    display: block;
+  }
+
+  .fila-datos {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------- accesibilidad (Apple §14) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+
+  .marcador.seleccionado {
+    transform: rotate(-45deg) scale(1.12);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .cristal,
+  .cabecera {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .cristal {
+    background: #ffffff;
+    border-color: #d1d5db;
+  }
+
+  .cabecera {
+    background: var(--azul-oscuro);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .cristal,
+  .tarjeta,
+  .cifra {
+    background: #ffffff;
+    border: 2px solid #111827;
+  }
+
+  .boton {
+    border-width: 2px;
+  }
+}

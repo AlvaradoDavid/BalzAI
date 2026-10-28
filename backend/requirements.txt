@@ -1,0 +1,8 @@
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+SQLAlchemy==2.1.6
+pydantic==2.14.1
+pydantic-settings==2.16.1
+PyJWT==2.15.1
+# Para PostgreSQL (producción), descomenta la siguiente línea y define DATABASE_URL:
+# psycopg[binary]==3.2.*

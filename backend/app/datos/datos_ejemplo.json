@@ -1,0 +1,79 @@
+{
+  "_comentario": "Datos de ejemplo. Agregar una ciudad o un parqueo es agregar un objeto aquí (o una fila en la base): no requiere cambios de código. Coordenadas aproximadas; 'ocupados_iniciales' solo sirve para la demostración.",
+  "ciudades": [
+    {
+      "slug": "cuenca",
+      "nombre": "Cuenca",
+      "provincia": "Azuay",
+      "latitud": -2.9001,
+      "longitud": -79.0059,
+      "zoom": 14,
+      "parqueos": [
+        {
+          "nombre": "Parqueadero Parque Calderón",
+          "direccion": "Simón Bolívar y Luis Cordero, Centro Histórico",
+          "latitud": -2.89706,
+          "longitud": -79.00444,
+          "capacidad": 120,
+          "ocupados_iniciales": 104
+        },
+        {
+          "nombre": "Parqueadero Mercado 10 de Agosto",
+          "direccion": "Calle Larga y General Torres",
+          "latitud": -2.90066,
+          "longitud": -79.00618,
+          "capacidad": 80,
+          "ocupados_iniciales": 80
+        },
+        {
+          "nombre": "Parqueadero Mercado 9 de Octubre",
+          "direccion": "Hermano Miguel y Gaspar Sangurima",
+          "latitud": -2.89485,
+          "longitud": -79.00128,
+          "capacidad": 150,
+          "ocupados_iniciales": 61
+        },
+        {
+          "nombre": "Parqueadero Plaza San Francisco",
+          "direccion": "Padre Aguirre y Presidente Córdova",
+          "latitud": -2.89878,
+          "longitud": -79.00658,
+          "capacidad": 60,
+          "ocupados_iniciales": 47
+        },
+        {
+          "nombre": "Parqueadero Parque de la Madre",
+          "direccion": "Av. 12 de Abril y Av. Fray Vicente Solano",
+          "latitud": -2.90452,
+          "longitud": -79.00418,
+          "capacidad": 90,
+          "ocupados_iniciales": 22
+        },
+        {
+          "nombre": "Parqueadero Terminal Terrestre",
+          "direccion": "Av. España y Sebastián de Benalcázar",
+          "latitud": -2.89216,
+          "longitud": -78.99258,
+          "capacidad": 200,
+          "ocupados_iniciales": 131
+        },
+        {
+          "nombre": "Parqueadero Aeropuerto Mariscal Lamar",
+          "direccion": "Av. España, junto a la terminal aérea",
+          "latitud": -2.88878,
+          "longitud": -78.98571,
+          "capacidad": 250,
+          "ocupados_iniciales": 96
+        },
+        {
+          "nombre": "Parqueadero Mall del Río",
+          "direccion": "Av. Felipe II y Circunvalación Sur",
+          "latitud": -2.91879,
+          "longitud": -79.03362,
+          "capacidad": 400,
+          "ocupados_iniciales": 188
+        }
+      ]
+    }
+  ]
+}
